@@ -353,7 +353,7 @@ endif
 MD = -mkdir$(EXE)
 RM = @rm -f
 OBJDUMP = @objdump
-PYTHON = @python
+PYTHON = @python2.7
 
 
 #-------------------------------------------------
@@ -485,7 +485,13 @@ ifdef FASTDEBUG
 DEFS += -DMAME_DEBUG_FAST
 endif
 
+ifneq ($(USE_AUTOFIRE),)
+DEFS += -DUSE_AUTOFIRE
+endif
 
+ifneq ($(USE_CUSTOM_BUTTON),)
+DEFS += -DUSE_CUSTOM_BUTTON
+endif
 #-------------------------------------------------
 # compile flags
 # CCOMFLAGS are common flags

@@ -302,4 +302,24 @@ public:
 private:
 };
 
+#ifdef USE_AUTOFIRE
+class ui_menu_autofire : public ui_menu {
+public:
+	ui_menu_autofire(running_machine &machine, render_container *container);
+	virtual ~ui_menu_autofire();
+	virtual void populate();
+	virtual void handle();
+};
+#endif /* USE_AUTOFIRE */
+
+#ifdef USE_CUSTOM_BUTTON
+class ui_menu_custom_button : public ui_menu {
+public:
+	ui_menu_custom_button(running_machine &machine, render_container *container);
+	virtual ~ui_menu_custom_button();
+	virtual void populate();
+	virtual void handle();
+};
+#endif /* USE_CUSTOM_BUTTON */
+
 #endif  /* __UI_MISCMENU_H__ */

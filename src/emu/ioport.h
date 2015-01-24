@@ -47,6 +47,16 @@ const unicode_char UCHAR_SHIFT_BEGIN = UCHAR_SHIFT_1;
 const unicode_char UCHAR_SHIFT_END = UCHAR_SHIFT_2;
 const unicode_char UCHAR_MAMEKEY_BEGIN = UCHAR_PRIVATE + 2;
 
+#ifdef USE_AUTOFIRE
+#define AUTOFIRE_ON 1 /* Autofire enable bit */
+#define AUTOFIRE_TOGGLE 2 /* Autofire toggle enable bit */
+#endif /* USE_AUTOFIRE */
+
+#ifdef USE_CUSTOM_BUTTON
+#define MAX_CUSTOM_BUTTONS 4
+#endif /* USE_CUSTOM_BUTTON */
+
+#define MAX_NORMAL_BUTTONS 10
 
 // sequence types for input_port_seq() call
 enum input_seq_type
@@ -185,6 +195,19 @@ enum ioport_type
 	IPT_BUTTON14,
 	IPT_BUTTON15,
 	IPT_BUTTON16,
+
+#ifdef USE_AUTOFIRE
+	// autofire control buttons
+	IPT_TOGGLE_AUTOFIRE,
+#endif /* USE_AUTOFIRE */
+
+#ifdef USE_CUSTOM_BUTTON
+	// custom action buttons
+	IPT_CUSTOM1,
+	IPT_CUSTOM2,
+	IPT_CUSTOM3,
+	IPT_CUSTOM4,
+#endif /* USE_CUSTOM_BUTTON */
 
 	// mahjong inputs
 	IPT_MAHJONG_FIRST,
@@ -1082,6 +1105,9 @@ public:
 	struct user_settings
 	{
 		ioport_value    value;                  // for DIP switches
+#ifdef USE_AUTOFIRE
+		int             autofire;               // autofire
+#endif /* USE_AUTOFIRE */
 		input_seq       seq[SEQ_TYPE_TOTAL];    // sequences of all types
 		INT32           sensitivity;            // for analog controls
 		INT32           delta;                  // for analog controls
@@ -1158,6 +1184,11 @@ struct ioport_field_live
 	bool                    last;               // were we pressed last time?
 	bool                    toggle;             // current toggle setting
 	digital_joystick::direction_t joydir;       // digital joystick direction index
+#ifdef USE_AUTOFIRE
+	UINT8                   autofire_toggle;    // autofire current toggle state
+	int                     autofire;           // autofire
+	int                     autopressed;        // autofire status
+#endif /* USE_AUTOFIRE */
 	astring                 name;               // overridden name
 };
 
@@ -1174,6 +1205,9 @@ public:
 
 	using tagged_list<ioport_port>::append;
 	void append(device_t &device, astring &errorbuf);
+#ifdef USE_CUSTOM_BUTTON
+	void append_custom(device_t &device, astring &errorbuf);
+#endif /* USE_CUSTOM_BUTTON */
 };
 
 
@@ -1398,6 +1432,14 @@ public:
 	INT32 frame_interpolate(INT32 oldval, INT32 newval);
 	ioport_type token_to_input_type(const char *string, int &player) const;
 	const char *input_type_to_token(astring &string, ioport_type type, int player);
+#ifdef USE_AUTOFIRE
+	bool auto_pressed(ioport_field *field);
+	int get_autofiredelay(int player) { return m_autofiredelay[player]; };
+	void set_autofiredelay(int player, int delay) { m_autofiredelay[player] = delay; };
+#endif /* USE_AUTOFIRE */
+#ifdef USE_CUSTOM_BUTTON
+	UINT16					m_custom_button[MAX_PLAYERS][MAX_CUSTOM_BUTTONS];
+#endif /* USE_CUSTOM_BUTTON */
 
 private:
 	// internal helpers
@@ -1439,6 +1481,13 @@ private:
 	running_machine &       m_machine;              // reference to owning machine
 	bool                    m_safe_to_read;         // clear at start; set after state is loaded
 	ioport_list             m_portlist;             // list of input port configurations
+#ifdef USE_CUSTOM_BUTTON
+	ioport_field *          m_custom_button_info[MAX_PLAYERS][MAX_CUSTOM_BUTTONS];
+#endif /* USE_CUSTOM_BUTTON */
+#ifdef USE_AUTOFIRE
+	int                     m_autofiredelay[MAX_PLAYERS];
+	int                     m_autofiretoggle[MAX_PLAYERS];
+#endif /* USE_AUTOFIRE */
 
 	// types
 	simple_list<input_type_entry> m_typelist;       // list of live type states
